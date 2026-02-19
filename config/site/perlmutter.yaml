@@ -1,0 +1,11 @@
+# @package _global_
+
+data_path=/global/cfs/cdirs/m906/protein-design
+
+boltz:
+  command: podman-hpc run --umask 0000 -it --gpu --rm --shm-size=64G -e CUDA_VISIBLE_DEVICES -v /global/cfs/cdirs/m906/protein-design:/global/cfs/cdirs/m906/protein-design boltz2:0.1.0 pixi run boltz predict
+
+
+
+colabfold:
+  command: podman-hpc run --umask 0000 -it --gpu --rm --shm-size=64G -e CUDA_VISIBLE_DEVICES -e CIF_FOLDER -v /tmp/cif:/tmp/cif -v /global/cfs/cdirs/m906/protein-design:/global/cfs/cdirs/m906/protein-design colabfold:0.1.0 pixi run -e colabfold colabfold_batch

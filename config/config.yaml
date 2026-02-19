@@ -1,0 +1,161 @@
+defaults:
+  - override hydra/job_logging: none
+  - override hydra/hydra_logging: none
+  - _self_
+
+base_dir: .
+work_dir: ${base_dir}/output_xama
+
+boltz:
+    colabfold:
+      database: ${data_path}/database/
+    cif_file: ${data_path}/heme_binder_diffusion/cif/Nyl12_refine13_no_tail.cif
+    boltz_params:
+      cache: ${data_path}/boltz
+
+
+hydra:
+  output_subdir: null
+  run:
+    dir: ${base_dir}
+
+enzymes:
+  - name: nyl10
+    chain:
+      alpha: MTAFGVDGVRVGHWSDPDAATGCTVVELPPGTVASYEVRGGAPASRELIALEPDKSVTAVDAVLLTGGSAFGLAAADGVMRRLEEAGRGVTTPAGVVPIVAAMALYDLAAGDASVRPGPAEGYAAARDVGTDVALHGRIGAGTGAHVGNWRGVDGRRPGGLGHAVRRLDDVVVAALCAVNAFGDIDDGHDEVVLDALRALPRPFDFERTN
+      beta: TTIGVVVTNARLDKTACRTVAQGAHDGLARAITPPHTRVDGDGFVAAATGEVEAHVDVVRLLALAAVTAAIRSVA
+    constraints:
+      - contact:
+           token1: [E, 1]
+           max_distance: 3.0
+           force: true
+      - contact:
+           token1: [A, 180] # Nyl10: 180; Nyl12: 186, Nyl50: 180
+           max_distance: 3.2
+           force: true
+    templates:
+        - cif: /data/35y/enzyme-substrate-modeling/cif/Nyl12_refine13_no_tail.cif
+          force: true
+          threshold: 1.0
+
+    relaxation:
+      residue_number: 929
+
+  - name: nyl12
+    chain:
+      alpha: MAASSTDNILHFDFPEVQIGTAINPEGPTGITLFYFPKGVQASVDIQGGSVGTFFTQEKMQQGEAYLDGVAFTGGGILGLEAVAGAVSSLFADQTKNEVQFRRMPLISGAVIFDYTPRQNMIYPDKALGQKAFAALSAGQFVQGRHGAGVSASVGKLLRDGFQLAGQGGAFAQIGKTKIAVFTVVNAVGVILDEKGEVIYGLPKGATKQTLNQQVTELLQQPKKPFWPEPKN
+      beta: TTLTIVITNEKLAPRHLKQLGRQVHHALSQVIHPYATILDGDVLYTVSTRSIESDLYAPGADIESDLNAKFIYLGMVAGELAKQAVWSAVGYSHRP
+    constraints:
+      - contact:
+           token1: [E, 1]
+           max_distance: 3.0
+           force: true
+      - contact:
+           token1: [A, 186]
+           max_distance: 3.2
+           force: true
+    relaxation:
+      residue_number: 928
+  - name: nyl50
+    chain:
+      alpha: MLTDIDGIRVGHATDARAMTGCTIAVFDEPVVPGVDVRGANAATIYTDLLYPDSVMPSVTGIMLTGGSAFGLEAALGAVRYFEEQGRGYDVGVAKIPLVPAAVIYDLSVGDANVRPDLAMGRRACEAAKPGPFERGRVGGGTGATVGKLYGVRQSSPGGLGTATVSLYGGIKVSAMIVVNSFGDLRDTAGRIVAGAKYEGGEFADTYARMKLGDKNQSALARMGMN
+      beta: TTIGIVSTNCRLTKVEASRMATLAHNGLARAICPIHTNVDGDTIFATGLQKSDLTAPVDLLGTAAAEAAMLACLDAVMQ
+    constraints:
+      - contact:
+           token1: [E, 1]
+           max_distance: 3.0
+           force: true
+      - contact:
+           token1: [A, 180] # Nyl10: 180; Nyl12: 186, Nyl50: 180
+           max_distance: 3.2
+           force: true
+    relaxation:
+      residue_number: 927
+
+
+substrates:
+  - name: pa6_dimer
+    smiles: "CC(NCCCCCC(NCCCCCC(NC)=O)=O)=O"
+    charge: -1
+    constraints:
+      - contact:
+           token2: [I, carbonyl_c1]
+      - contact:
+           token2: [I, carbonyl_o1]
+  - name: pa6_tetramer
+    smiles: "CC(NCCCCCC(NCCCCCC(NCCCCCC(NCCCCCC(NC)=O)=O)=O)=O)=O"
+    charge: 0
+    constraints:
+      - contact:
+           token2: [I, carbonyl_c2]
+      - contact:
+           token2: [I, carbonyl_o2]
+  - name: pa11_dimer
+    smiles: "CC(NCCCCCCCCCCC(NCCCCCCCCCCC(NC)=O)=O)=O"
+    charge: -1
+    constraints:
+      - contact:
+           token2: [I, carbonyl_c3]
+      - contact:
+           token2: [I, carbonyl_o3]
+  - name: pa12_dimer
+    smiles: "CC(NCCCCCCCCCCCC(NCCCCCCCCCCCC(NC)=O)=O)=O"
+    charge: 0
+    constraints:
+      - contact:
+           token2: [I, carbonyl_c4]
+      - contact:
+           token2: [I, carbonyl_o4]
+
+boltz:
+    output_dir: ${work_dir}/0_boltz
+    command: "pixi run boltz predict"
+    input_files_dir: ${boltz.output_dir}/input
+    yaml_files_dir: yaml
+    boltz_input_template: "templates/boltz.yaml.j2"
+    batch_processing: false
+    models_per_sequence: 5
+    boltz_params:
+      model: boltz2
+      output_format: pdb
+      use_msa_server: true
+      msa_pairing_strategy: greedy
+      use_potentials: true
+      cache: ${data_path}/boltz
+      output_dir: ${boltz.output_dir}
+      affinity_mw_correction: true
+      recycling_steps: 3
+      sampling_steps: 200
+      diffusion_samples: 1
+      no_kernels: true
+      extra_params: ""
+    properties:
+      - affinity:
+           binder: I
+
+relaxation:
+    output_dir: ${work_dir}/1_relaxation
+    amber_command: "pixi run --as-is -e analysis bash ${base_dir}/src/compute_amber_params.sh"
+    relaxation_command: ${base_dir}/src/run_relaxation.sh
+
+filtering:
+  enable: true
+  filter_relaxed_results: true
+  remove_non_relaxable_models: true
+  output_dir: ${work_dir}/final
+  atom_selections_file_prefix: ${base_dir}/config/atom_selections
+  atom_selections_file_relaxed_prefix: ${base_dir}/config/atom_selections_relaxed
+  d1_max: 3.2
+  d2_max: 3.8
+  d3_max: 3.8
+  d4_max: 10.0
+  a1_min: 80.0
+  a1_max: 120.0
+  t1_min: 70.0
+  t1_max: 110.0
+  interface_delta_max: 0
+  min_loop_confidences:
+    - 70
+    - 70
+    - 70
+

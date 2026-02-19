@@ -1,0 +1,22 @@
+source leaprc.protein.ff19SB
+source leaprc.gaff
+
+loadamberparams lig.frcmod
+loadoff lig.lib
+
+prot = loadpdb protein.pdb
+lig = loadpdb lig_h.pdb
+complex = combine {prot lig}
+
+remove complex complex.__RES_NUM__.H3
+set complex.__RES_NUM__.N charge -0.4844
+set complex.__RES_NUM__.H1 charge 0.1224
+set complex.__RES_NUM__.H2 charge 0.1224
+
+check complex
+charge complex
+
+
+saveamberparm complex complex.prmtop complex.inpcrd
+savepdb complex complex.pdb
+quit

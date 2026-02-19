@@ -1,0 +1,67 @@
+[workspace]
+name = "enzyme-substrate"
+version = "0.1.0"
+description = "enzyme-substrate modeling"
+authors = []
+platforms = ["linux-64"]
+
+channels = [
+    "pytorch",
+    "conda-forge",
+    "nvidia",
+    "https://conda.graylab.jhu.edu",
+    "protein-design",
+    "dglteam/label/cu118",
+    "pyg",
+    "bioconda",
+    "schrodinger",
+    "dacase",
+]
+channel-priority = "disabled"
+
+[environments]
+colabfold = ["colabfold"]
+boltz = ["boltz"]
+analysis = ["analysis"]
+
+[feature.boltz.dependencies]
+    python = "3.10.*"
+    pytest = "*"
+    jinja2 = "*"
+
+
+[feature.analysis.dependencies]
+    python = "3.12.*"
+    pymol-bundle = "*"
+    pandas = "*"
+    natsort = "*"
+    tabulate = "*"
+    hydra-core = "*"
+    ambertools-dac = "25.*"
+    openmm = "*"
+    cudatoolkit = "11.8.*"
+    pyrosetta = "*"
+openbabel = ">=3.1.1,<4"
+
+[feature.colabfold.dependencies]
+    python = "3.10.*"
+    mmseqs2 = "*"
+    hhsuite = "*"
+    pdbfixer = "*"
+
+[feature.colabfold.pypi-options]
+index-url = "https://pypi.org/simple"
+extra-index-urls = ["https://example.com/simple"]
+find-links = [{url= 'https://storage.googleapis.com/jax-releases/jax_cuda_releases.html'}]
+
+[feature.colabfold.pypi-dependencies]
+    colabfold = { git = "git+https://github.com/sokrypton/ColabFold", extras=["alphafold"] }
+    jax = {version="*",extras=["cuda"]}
+
+[feature.boltz.pypi-dependencies]
+    boltz = {version="*",extras=["cuda"]}
+    hydra-core = "*"
+
+
+[feature.boltz.tasks]
+    boltz = "boltz"

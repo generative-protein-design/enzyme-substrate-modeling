@@ -1,0 +1,34 @@
+version: 1
+sequences:
+  - protein:
+      id: [A, B, C, D] # four identical alpha chains
+      sequence: {{ alpha_seq }}
+{%- if msa_file %}
+      msa: {{ msa_file }}_alpha.csv
+{%- endif %}
+  - protein:
+      id: [E, F, G, H] # four identical beta chains
+      sequence: {{ beta_seq }}
+{%- if msa_file %}
+      msa: {{ msa_file }}_beta.csv
+{%- endif %}
+  - ligand:
+      id: I
+      smiles: '{{ smiles }}'
+
+{%- if constraints %}
+
+constraints:
+  {{ constraints | to_yaml | indent(2)}}
+{%- endif %}
+
+{%- if templates %}
+templates:
+  {{ templates | to_yaml | indent(2)}}
+{%- endif %}
+
+{%- if properties %}
+
+properties:
+  {{ properties | to_yaml | indent(2)}}
+{%- endif %}

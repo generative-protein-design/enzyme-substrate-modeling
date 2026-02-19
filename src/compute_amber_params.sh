@@ -1,0 +1,47 @@
+#!/bin/bash
+
+set -e
+
+for ARG in "$@"; do
+    case $ARG in
+        --input_model=*)
+            INPUT_MODEL="${ARG#*=}"
+            ;;
+        --output_folder=*)
+            OUTPUT_FOLDER="${ARG#*=}"
+            ;;
+        --charge=*)
+            CHARGE="${ARG#*=}"
+            ;;
+        *)
+            echo "Unknown argument: $ARG"
+            exit 1
+            ;;
+    esac
+done
+
+
+BASE_DIR=`pwd`
+
+MODEL=$(basename "$INPUT_MODEL" .pdb)
+
+
+echo computing Amber parameters using $INPUT_MODEL ...
+
+# Generate Amber parameters with antechamber.
+mkdir -p $OUTPUT_FOLDER
+cp $BASE_DIR/config/leap.in $OUTPUT_FOLDER
+cd $OUTPUT_FOLDER
+pixi run -e analysis python $BASE_DIR/src/add_hydrogens_pymol.py $INPUT_MODEL .
+pixi run -e analysis obabel lig_h_pymol.pdb -O lig_h.pdb -p 7.4
+pixi run -e analysis obabel lig_h_pymol.mol2 -O lig_h.mol2 -p 7.4
+pixi run -e analysis antechamber -i lig_h.pdb -fi pdb -o lig.mol2 -fo mol2 -c bcc -s 2 -nc $CHARGE
+pixi run -e analysis parmchk2 -i lig.mol2 -f mol2 -o lig.frcmod
+pixi run -e analysis tleap -f leap.in
+cd - > /dev/null
+
+echo Amber parameters are saved in $OUTPUT_FOLDER
+
+
+
+

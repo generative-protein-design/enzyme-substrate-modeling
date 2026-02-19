@@ -1,0 +1,29 @@
+version: 1
+sequences:
+  - protein:
+      id: [A] # just one alpha chain
+      sequence: {{ alpha_seq }}
+{%- if msa_file %}
+      msa: {{ msa_file }}_alpha.csv
+{%- endif %}
+  - protein:
+      id: [E] # just one beta chain
+      sequence: {{ beta_seq }}
+{%- if msa_file %}
+      msa: {{ msa_file }}_beta.csv
+{%- endif %}
+  - ligand:
+      id: I
+      smiles: '{{ smiles }}'
+
+{%- if constraints %}
+
+constraints:
+  {{ constraints | to_yaml | indent(2)}}
+{%- endif %}
+
+{%- if properties %}
+
+properties:
+  {{ properties | to_yaml | indent(2)}}
+{%- endif %}
