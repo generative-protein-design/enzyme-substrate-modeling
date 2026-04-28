@@ -41,7 +41,8 @@ analysis = ["analysis"]
     openmm = "*"
     cudatoolkit = "11.8.*"
     pyrosetta = "*"
-openbabel = ">=3.1.1,<4"
+    openbabel = ">=3.1.1,<4"
+    rdkit = "*"
 
 [feature.colabfold.dependencies]
     python = "3.10.*"
@@ -61,6 +62,7 @@ find-links = [{url= 'https://storage.googleapis.com/jax-releases/jax_cuda_releas
 [feature.boltz.pypi-dependencies]
     boltz = {version="*",extras=["cuda"]}
     hydra-core = "*"
+    rdkit = "*"
 
 
 [feature.boltz.tasks]

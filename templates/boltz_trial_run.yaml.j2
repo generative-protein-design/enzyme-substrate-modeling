@@ -22,6 +22,11 @@ constraints:
   {{ constraints | to_yaml | indent(2)}}
 {%- endif %}
 
+{%- if templates %}
+templates:
+  {{ templates | to_yaml | indent(2)}}
+{%- endif %}
+
 {%- if properties %}
 
 properties:

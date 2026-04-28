@@ -183,7 +183,7 @@ def main(conf: HydraConfig) -> None:
                 "d1": round(d1, 2),
                 "d2": round(d2, 2),
                 "d3": round(d3, 2),
-                "d4": round(d3, 2),
+                "d4": round(d4, 2),
                 "a1": round(a1, 1),
                 "t1": round(t1, 1),
                 "t2": round(t2, 1),
@@ -217,8 +217,8 @@ def main(conf: HydraConfig) -> None:
     )
 
     df = df.sort_values(by="lig_iptm", ascending=False)
-    df_colabfold = pd.read_csv(Path(conf.filtering.output_dir) / "colabfold_results.csv")
-    df = df.merge(df_colabfold, on="sequence_name", how="left")
+#    df_colabfold = pd.read_csv(Path(conf.filtering.output_dir) / "colabfold_results.csv")
+#    df = df.merge(df_colabfold, on="sequence_name", how="left")
     df.to_csv(Path(conf.filtering.output_dir) / "full_metrics.csv", index=False)
 
     filtered = df[

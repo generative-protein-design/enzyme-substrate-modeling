@@ -32,8 +32,8 @@ def add_hydrogens_to_ligand(pdb_file, output_dir):
 #    cmd.h_add("ligand")
 
     pdb_path = Path(pdb_file)
-    output_pdb_file = output_dir / "lig_h_pymol.pdb"
-    output_mol_file = output_dir / "lig_h_pymol.mol2"
+    output_pdb_file = output_dir / "lig_pymol.pdb"
+    output_mol_file = output_dir / "lig_pymol.mol2"
 
     cmd.save(output_pdb_file, "ligand")
     cmd.save(output_mol_file, "ligand")

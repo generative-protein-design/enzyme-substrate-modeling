@@ -13,6 +13,7 @@ from jinja2 import Template, Environment
 from copy import deepcopy
 
 from omegaconf import OmegaConf
+from src.scissile import infer_scissile_atom_names_from_context_smarts
 
 logging.basicConfig(
     level=logging.INFO,
@@ -128,15 +129,28 @@ def combine_constraints(enzyme,substrate):
     return combined_constraints
 
 def render_boltz_input(enzyme, substrate, template_path: str, output_dir: str, conf, msa_file) -> None:
+
+
+#    inferred_c, inferred_o, inferred_n, _ = infer_scissile_atom_names_from_context_smarts(
+#        ligand_smiles=substrate.smiles,
+#        context_smarts=substrate.smarts,
+#        match_index=0,
+#       require_unique=True,
+#    )
+
+#    logging.info("infer_scissile_atom_names_from_context_smarts",inferred_c, inferred_o, inferred_n)
+
     constraints = combine_constraints(enzyme,substrate)
     context = {
         "alpha_seq": enzyme.chain["alpha"],
         "beta_seq": enzyme.chain["beta"],
         "smiles": substrate.smiles,
         "constraints": constraints,
-        "templates": OmegaConf.to_container(enzyme.get("templates", None),resolve=True),
+        "templates": None,
         "properties": OmegaConf.to_container(conf.boltz.properties, resolve=True),
     }
+    if enzyme.get("templates", None):
+        context["templates"]= OmegaConf.to_container(enzyme["templates"],resolve=True)
     if not conf.boltz.boltz_params.use_msa_server:
         context["msa_file"] = os.path.join(output_dir, conf.boltz.colabfold.output_folder, msa_file)
     template_path = Path(template_path)

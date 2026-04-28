@@ -4,7 +4,7 @@ defaults:
   - _self_
 
 base_dir: .
-work_dir: ${base_dir}/output_no_constraints
+work_dir: ${base_dir}/output_xama
 
 hydra:
   output_subdir: null
@@ -15,38 +15,38 @@ enzymes:
   - name: nyl12
     chain:
       alpha: MAASSTDNILHFDFPEVQIGTAINPEGPTGITLFYFPKGVQASVDIQGGSVGTFFTQEKMQQGEAYLDGVAFTGGGILGLEAVAGAVSSLFADQTKNEVQFRRMPLISGAVIFDYTPRQNMIYPDKALGQKAFAALSAGQFVQGRHGAGVSASVGKLLRDGFQLAGQGGAFAQIGKTKIAVFTVVNAVGVILDEKGEVIYGLPKGATKQTLNQQVTELLQQPKKPFWPEPKN
-      beta: TTLTIVITNEKLAPRHLKQLGRQVHHALSQVIHPYATILDGDVLYTVSTRSIESDLYAPGADIESDLNAKFIYLGMVAGELAKQAVWSAVGYSHRP 
-    constraints: []
+      beta: TTLTIVITNEKLAPRHLKQLGRQVHHALSQVIHPYATILDGDVLYTVSTRSIESDLYAPGADIESDLNAKFIYLGMVAGELAKQAVWSAVGYSHRP
+    constraints:
+      - contact:
+           token1: [E, 1]
+           max_distance: 3.0
+           force: true
+      - contact:
+           token1: [A, 186]
+           max_distance: 3.2
+           force: true
     relaxation:
-      residue_number: 929 
-    templates: []
+      residue_number: 929
 
 substrates:
-  - name: pa46_l2z
-    constraints: []
-    smiles: "[NH3+]CCCCNC(=O)CCCCC(=O)NCCCCNC(=O)CCCCC(=O)[O-]"
+  - name: pa6_l4z
     charge: 0
-  - name: pa6_l5z
-    smiles: "[NH3+]CCCCCC(=O)NCCCCCC(=O)NCCCCCC(=O)NCCCCCC(=O)NCCCCCC(=O)[O-]"
-    charge: 0
-    constraints: []
-  - name: pa610_l2z
-    constraints: []
-    smiles: "[NH3+]CCCCCCNC(=O)CCCCCCCCC(=O)NCCCCCCNC(=O)CCCCCCCCC(=O)[O-]"
-    charge: 0
-  - name: pa11_l2z
-    constraints: []
-    smiles: "[NH3+]CCCCCCCCCCC(=O)NCCCCCCCCCCC(=O)[O-]"
-    charge: 0
+    smiles: "[O-]C(CCCCCNC(CCCCCNC(CCCCCNC(CCCCC[NH3+])=O)=O)=O)=O"
+    smarts: "[O-][C:1](=[O:2])CCCCCN[C:3](=[O:4])CCCCCN[C:5](=[O:6])CCCCCN[C:7](=[O:8])CCCCC[NH3+]"
+    constraints:
+      - contact:
+           token2: [I, C54]
+      - contact:
+           token2: [I, O49]
 
 boltz:
     output_dir: ${work_dir}/0_boltz
     command: "pixi run boltz predict"
     input_files_dir: ${boltz.output_dir}/input
     yaml_files_dir: yaml
-    boltz_input_template: "templates/boltz_trial_run.yaml.j2"
+    boltz_input_template: "templates/boltz.yaml.j2"
     batch_processing: false
-    models_per_sequence: 1
+    models_per_sequence: 5
     boltz_params:
       model: boltz2
       output_format: pdb

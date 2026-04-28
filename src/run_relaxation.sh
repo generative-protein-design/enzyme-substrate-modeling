@@ -28,9 +28,9 @@ MODEL=$(basename "$INPUT_MODEL" .pdb)
 mkdir -p $OUTPUT_FOLDER/$MODEL
 
 
-pixi run -e analysis python src/add_hydrogens_pymol.py $INPUT_MODEL $OUTPUT_FOLDER/$MODEL
-pixi run -e analysis obabel $OUTPUT_FOLDER/$MODEL/lig_h_pymol.pdb -O $OUTPUT_FOLDER/$MODEL/lig_h.pdb -p 7.4
-pixi run -e analysis obabel $OUTPUT_FOLDER/$MODEL/lig_h_pymol.mol2 -O $OUTPUT_FOLDER/$MODEL/lig_h.mol2 -p 7.4
+pixi run -e analysis python src/add_hydrogens_obabel.py $INPUT_MODEL $OUTPUT_FOLDER/$MODEL
+#pixi run -e analysis obabel $OUTPUT_FOLDER/$MODEL/lig_pymol.pdb -O $OUTPUT_FOLDER/$MODEL/lig_h.pdb -p 7.4
+#pixi run -e analysis obabel $OUTPUT_FOLDER/$MODEL/lig_pymol.mol2 -O $OUTPUT_FOLDER/$MODEL/lig_h.mol2 -p 7.4
 
 # Generate Amber prmtop and inpcrd files with tleap. Run this step for every unique sequence.
 #https://ambermd.org/tutorials/basic/tutorial4b/

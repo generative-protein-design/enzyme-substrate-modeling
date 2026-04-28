@@ -1,0 +1,8 @@
+atom_id,chain,resi,atom_name,
+thr_og1,E,1,OG1,
+backbone_n,A,113,N,
+sidechain_nd2,A,186,ND2,
+carbonyl_c,I,1,C68,
+carbonyl_o,I,1,O62,
+substrate_c,I,1,C78,
+substrate_n,I,1,N72,
