@@ -89,11 +89,11 @@ def compute_metrics(mol, atoms):
     d1 = distance(mol, atoms["thr_og1"], atoms["carbonyl_c"])
     d2 = distance(mol, atoms["carbonyl_o"], atoms["backbone_n"])
     d3 = distance(mol, atoms["carbonyl_o"], atoms["sidechain_nd2"])
-    d4 = distance(mol, atoms["substrate_c73"], atoms["resi161_ca"])
+    #d4 = distance(mol, atoms["substrate_c73"], atoms["resi161_ca"])
     a1 = angle(mol, atoms["thr_og1"], atoms["carbonyl_c"], atoms["carbonyl_o"])
     t1 = dihedral(mol, atoms["thr_og1"], atoms["carbonyl_c"], atoms["carbonyl_o"], atoms["substrate_c"])
     t2 = dihedral(mol, atoms["substrate_n"], atoms["substrate_c"], atoms["sidechain_nd2"], atoms["backbone_n"])
-    return d1, d2, d3, d4, a1, t1, t2
+    return d1, d2, d3, a1, t1, t2
 
 
 def add_relaxed_files(conf, files):
@@ -154,7 +154,7 @@ def main(conf: HydraConfig) -> None:
         cmd.load(str(mol), "mol1")
 
         # Compute geometry
-        d1, d2, d3, d4, a1, t1, t2 = compute_metrics(mol, atoms)
+        d1, d2, d3, a1, t1, t2 = compute_metrics(mol, atoms)
 
         if energy_json:
             with open(energy_json, "r") as f:
@@ -183,7 +183,6 @@ def main(conf: HydraConfig) -> None:
                 "d1": round(d1, 2),
                 "d2": round(d2, 2),
                 "d3": round(d3, 2),
-                "d4": round(d4, 2),
                 "a1": round(a1, 1),
                 "t1": round(t1, 1),
                 "t2": round(t2, 1),
@@ -225,7 +224,6 @@ def main(conf: HydraConfig) -> None:
         (df["d1"] < conf.filtering.d1_max)
         & (df["d2"] < conf.filtering.d2_max)
         & (df["d3"] < conf.filtering.d3_max)
-        & (df["d4"] < conf.filtering.d4_max)
         & (df["interface_delta"] < conf.filtering.interface_delta_max)
         & (df["a1"].between(conf.filtering.a1_min, conf.filtering.a1_max))
         & (df["t1"].abs().between(conf.filtering.t1_min, conf.filtering.t1_max))

@@ -1,0 +1,117 @@
+defaults:
+  - override hydra/job_logging: none
+  - override hydra/hydra_logging: none
+  - _self_
+
+base_dir: .
+work_dir: ${base_dir}/output_commercial_polyamides
+
+hydra:
+  output_subdir: null
+  run:
+    dir: ${base_dir}
+
+enzymes:
+  - name: nyl12
+    chain:
+      alpha: MAASSTDNILHFDFPEVQIGTAINPEGPTGITLFYFPKGVQASVDIQGGSVGTFFTQEKMQQGEAYLDGVAFTGGGILGLEAVAGAVSSLFADQTKNEVQFRRMPLISGAVIFDYTPRQNMIYPDKALGQKAFAALSAGQFVQGRHGAGVSASVGKLLRDGFQLAGQGGAFAQIGKTKIAVFTVVNAVGVILDEKGEVIYGLPKGATKQTLNQQVTELLQQPKKPFWPEPKN
+      beta: TTLTIVITNEKLAPRHLKQLGRQVHHALSQVIHPYATILDGDVLYTVSTRSIESDLYAPGADIESDLNAKFIYLGMVAGELAKQAVWSAVGYSHRP 
+    constraints: 
+      - contact:
+          token1: [E, 1]
+          max_distance: 3.0
+          force: true
+      - contact:
+          token1: [A, 186]
+          max_distance: 3.2
+          force: true
+    relaxation:
+      residue_number: 929 
+    templates: []
+
+substrates:
+  - name: pa46_l2z
+    smiles: "[NH3+]CCCCNC(=O)CCCCC(=O)NCCCCNC(=O)CCCCC(=O)[O-]"
+    charge: 0
+    constraints:
+      - contact:
+          token2: [I, C47]
+      - contact:
+          token2: [I, O42]
+      
+  - name: pa6_l5z
+    smiles: "[NH3+]CCCCCC(=O)NCCCCCC(=O)NCCCCCC(=O)NCCCCCC(=O)NCCCCCC(=O)[O-]"
+    charge: 0
+    constraints:
+      - contact:
+          token2: [I, C68]
+      - contact:
+          token2: [I, O62]
+
+  - name: pa610_l2z
+    smiles: "[NH3+]CCCCCCNC(=O)CCCCCCCCC(=O)NCCCCCCNC(=O)CCCCCCCCC(=O)[O-]"
+    charge: 0
+    constraints:
+      - contact:
+          token2: [I, C71]
+      - contact:
+          token2: [I, O66]
+
+  - name: pa11_l2z
+    smiles: "[NH3+]CCCCCCCCCCC(=O)NCCCCCCCCCCC(=O)[O-]"
+    charge: 0
+    constraints:
+      - contact:
+          token2: [I, C48]
+      - contact:
+          token2: [I, O45]
+
+boltz:
+    output_dir: ${work_dir}/0_boltz
+    command: "pixi run boltz predict"
+    input_files_dir: ${boltz.output_dir}/input
+    yaml_files_dir: yaml
+    boltz_input_template: "templates/boltz.yaml.j2"
+    batch_processing: false
+    models_per_sequence: 30 
+    boltz_params:
+      model: boltz2
+      output_format: pdb
+      use_msa_server: true
+      msa_pairing_strategy: greedy
+      use_potentials: true
+      cache: /data/jpc/code/boltz
+      output_dir: ${boltz.output_dir}
+      affinity_mw_correction: true
+      recycling_steps: 3
+      sampling_steps: 200
+      diffusion_samples: 1
+      no_kernels: true
+      extra_params: ""
+    properties:
+      - affinity:
+           binder: I
+
+relaxation:
+    output_dir: ${work_dir}/1_relaxation
+    amber_command: "pixi run --as-is -e analysis bash ${base_dir}/src/compute_amber_params.sh"
+    relaxation_command: ${base_dir}/src/run_relaxation.sh
+
+filtering:
+  enable: true
+  filter_relaxed_results: true
+  remove_non_relaxable_models: true
+  output_dir: ${work_dir}/final
+  atom_selections_file_prefix: ${base_dir}/config/atom_selections
+  atom_selections_file_relaxed_prefix: ${base_dir}/config/atom_selections_relaxed
+  d1_max: 3.2
+  d2_max: 3.8
+  d3_max: 3.8
+  d4_max: 10.0
+  a1_min: 90.0
+  a1_max: 120.0
+  t1_min: 70.0
+  t1_max: 110.0
+  interface_delta_max: 0
+  min_loop_confidences: []
+

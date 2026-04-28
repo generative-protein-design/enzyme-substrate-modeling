@@ -192,7 +192,7 @@ def add_hydrogens_to_ligand(pdb_file: Path, output_dir: Path, ligand_resname: st
     ligand_h_tmp = output_dir / "lig_h_tmp.pdb"
     output_pdb = output_dir / "lig_h.pdb"
     output_mol2 = output_dir / "lig_h.mol2"
-    output_sdf = output_dir / "lig_h.sdf" # JMP - need sdf format for xtb optimization
+    output_sdf = output_dir / "lig_h.sdf"
     output_charge = output_dir / "lig_charge.txt"
 
     extract_ligand_pdb(pdb_file, ligand_raw, ligand_resname=ligand_resname)

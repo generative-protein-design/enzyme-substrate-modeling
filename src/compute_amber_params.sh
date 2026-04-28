@@ -33,8 +33,8 @@ mkdir -p $OUTPUT_FOLDER
 cp $BASE_DIR/config/leap.in $OUTPUT_FOLDER
 cd $OUTPUT_FOLDER
 pixi run -e analysis python $BASE_DIR/src/add_hydrogens_obabel.py $INPUT_MODEL .
-pixi run -e analysis $BASE_DIR/src/xtb_optimize_hydrogens.py lig_h.sdf --verbose
-pixi run -e analysis antechamber -i lig_h_opt.sdf -fi sdf -o lig.mol2 -fo mol2 -c bcc -s 2 -nc $CHARGE -ek "maxcyc=0" # JMP: Don't optimize the geometry.
+pixi run -e analysis $BASE_DIR/src/optimize_hydrogens_xtb.py lig_h.sdf # --verbose
+pixi run -e analysis antechamber -i lig_h_opt.mol2 -fi mol2 -o lig.mol2 -fo mol2 -c bcc -s 2 -nc $CHARGE -rn LIG -an n -ek "maxcyc=0"
 pixi run -e analysis parmchk2 -i lig.mol2 -f mol2 -o lig.frcmod
 pixi run -e analysis tleap -f leap.in
 cd - > /dev/null

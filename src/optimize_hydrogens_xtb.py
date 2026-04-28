@@ -3,7 +3,7 @@
 Keep heavy atoms fixed and optimize only the hydrogen atoms with xTB.
 
 Example:
-    python xtb_optimize_hydrogens.py lig_h.sdf
+    python optimize_hydrogens_xtb.py lig_h.sdf
 
 Outputs:
     constrain.inp
@@ -369,6 +369,104 @@ def run_obabel_sdf_to_mol2(input_sdf: Path, output_mol2: Path) -> None:
         raise RuntimeError(f"Open Babel did not create MOL2 output: {output_mol2}")
 
 
+def read_mol2_atom_names(path: Path) -> list[str]:
+    names: list[str] = []
+    in_atom_section = False
+
+    for raw_line in path.read_text().splitlines():
+        line = raw_line.strip()
+
+        if line.upper() == "@<TRIPOS>ATOM":
+            in_atom_section = True
+            continue
+
+        if line.startswith("@<TRIPOS>"):
+            if in_atom_section:
+                break
+            continue
+
+        if not in_atom_section or not line:
+            continue
+
+        fields = raw_line.split()
+        if len(fields) < 2:
+            continue
+
+        names.append(fields[1])
+
+    if not names:
+        raise ValueError(f"No atoms found in MOL2 ATOM section: {path}")
+
+    return names
+
+
+def restore_mol2_atom_and_residue_names(
+    target_mol2: Path,
+    reference_mol2: Path,
+    residue_name: str = "LIG1",
+) -> None:
+    ref_atom_names = read_mol2_atom_names(reference_mol2)
+    target_lines = target_mol2.read_text().splitlines()
+
+    out_lines: list[str] = []
+    in_atom_section = False
+    atom_idx = 0
+
+    for raw_line in target_lines:
+        line = raw_line.strip()
+
+        if line.upper() == "@<TRIPOS>ATOM":
+            in_atom_section = True
+            out_lines.append(raw_line)
+            continue
+
+        if line.startswith("@<TRIPOS>"):
+            in_atom_section = False
+            out_lines.append(raw_line)
+            continue
+
+        if not in_atom_section or not line:
+            out_lines.append(raw_line)
+            continue
+
+        fields = raw_line.split()
+        if len(fields) < 8:
+            raise ValueError(f"Unexpected MOL2 atom line format in {target_mol2}: {raw_line!r}")
+
+        if atom_idx >= len(ref_atom_names):
+            raise ValueError(
+                f"Target MOL2 has more atoms than reference names in {reference_mol2}"
+            )
+
+        fields[1] = ref_atom_names[atom_idx]
+        fields[7] = residue_name
+        atom_idx += 1
+
+        formatted = (
+            f"{fields[0]:>7} {fields[1]:<8} {fields[2]:>10} {fields[3]:>10} "
+            f"{fields[4]:>10} {fields[5]:<7} {fields[6]:>4}  {fields[7]:<8}"
+        )
+
+        if len(fields) > 8:
+            formatted += f" {fields[8]:>10}"
+
+        if len(fields) > 9:
+            formatted += " " + " ".join(fields[9:])
+
+        out_lines.append(formatted)
+
+    if atom_idx == 0:
+        raise ValueError(f"No target atoms found in MOL2 ATOM section: {target_mol2}")
+
+    if atom_idx != len(ref_atom_names):
+        raise ValueError(
+            f"Atom count mismatch for name restore: target has {atom_idx}, "
+            f"reference has {len(ref_atom_names)}"
+        )
+
+    target_mol2.write_text("\n".join(out_lines) + "\n")
+
+
 def rmsd_for_atoms(
     coords_a: Sequence[tuple[float, float, float]],
     coords_b: Sequence[tuple[float, float, float]],
@@ -566,6 +664,12 @@ def main() -> None:
     print(f"Wrote: {output_sdf}")
 
     run_obabel_sdf_to_mol2(output_sdf, output_mol2)
+    reference_mol2 = work_dir / "lig_h.mol2"
+    if not reference_mol2.exists():
+        raise FileNotFoundError(
+            f"Reference MOL2 for atom names was not found: {reference_mol2}"
+        )
+    restore_mol2_atom_and_residue_names(output_mol2, reference_mol2, residue_name="LIG1")
     print(f"Wrote: {output_mol2}")
 
     if not args.keep_junk:

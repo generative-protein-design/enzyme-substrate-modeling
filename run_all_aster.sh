@@ -53,4 +53,4 @@ pixi run --as-is -e analysis python analyze_boltz_models.py +site=aster --config
 CMD
 
 
-chmod og+rwX -R .
+#chmod og+rwX -R .
